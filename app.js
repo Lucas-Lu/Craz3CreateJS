@@ -6,18 +6,29 @@
 	var update = true;
 	var squareArr = [[],[],[],[],[],[],[],[],[]];
 	var currIndexX,currIndexY;
+	var text = new createjs.Text("Hello", "20px Arial", "#ff7700");
 	init();
 	var score = 0;
+
 	var intervalID;
-    intervalID = window.setInterval(doscreenSquareCrash, 1000); 
-	
+    intervalID = window.setInterval(firstCreanScreen, 500); 
+    function firstCreanScreen(){
+    	doscreenSquareCrash();
+    	score = 0;
+    	text.text = "score:" + score;
+	    stage.update();
+    }
+
 	function doscreenSquareCrash(){
-		var this_score = screenSquareCrash();
-		score += this_score;
-		if(this_score == 0){
+		var crashedIndexsArr = screenSquareCrash();
+		ClearCraz3(crashedIndexsArr);
+		score += crashedIndexsArr.length;
+		if(crashedIndexsArr.length == 0){
 			window.clearInterval(intervalID);
 		}
 		else{
+			text.text = "score:" + score;
+			stage.update();
 			console.log("score:" + score);
 		}
 	}
@@ -28,16 +39,16 @@
 
 		//check to see if we are running in a browser with touch support
 		stage = new createjs.Stage(canvas);
-
 		// enable touch interactions if supported on the current device:
 		createjs.Touch.enable(stage);
 
 		// enabled mouse over / out events
 		stage.enableMouseOver(10);
 		stage.mouseMoveOutside = true; // keep tracking the mouse even when it leaves the canvas
-
-
+		text.x = 10;
+        stage.addChild(text);
 		addSquare ();
+
 		// load the source image:
 
 	}
@@ -45,6 +56,7 @@
 	function addSquare () {
 		var container = new createjs.Container();
 		stage.addChild(container);
+		container.y = 30;
     	for(var indexX = 0 ; indexX < 9 ; indexX ++){
 	        for(var indexY = 0; indexY < 9 ; indexY ++){
 	        	var image = new Image();
@@ -53,12 +65,12 @@
 		        image.onload = function(event){
 		        	var image = event.target;
 		        	var hitArea = new createjs.Shape();
-	                hitArea.graphics.beginFill("#FFF").drawEllipse(-11, -14, 24, 18);
+	                hitArea.graphics.beginFill("#FFF").drawEllipse(-11, -14, 40, 40);
 	                // create a shape that represents the center of the daisy image:
 	                
 	                // position hitArea relative to the internal coordinate system of the target bitmap instances:
-	                hitArea.x = image.width / 2 ;
-	                hitArea.y = image.height / 2 ;
+	                hitArea.x = image.width / 3 ;
+	                hitArea.y = image.height / 3 ;
 	                for(var i = 0;i < 9;i ++){
 	                	for(var j = 0;j < 9;j ++){
 	                		squareArr[i][j].hitArea = hitArea;
@@ -124,23 +136,27 @@
 		         bitmap.addEventListener("pressup", function (evt) {
 		         	var moveDistanceX = evt.target.x - currIndexX * 55;
 		        	var moveDistanceY = evt.target.y - currIndexY * 55;
+		        	var s_new;
 		         	if(moveDistanceX != 0){
 		         		if(Math.abs(moveDistanceX) > 30){
-		         			var s_new = squareArr[currIndexX + (moveDistanceX > 0 ? 1 : -1)][currIndexY];
+		         			s_new = squareArr[currIndexX + (moveDistanceX > 0 ? 1 : -1)][currIndexY];
 		         			switchBitMapImage(s_new,squareArr[currIndexX][currIndexY]);
 		         		}
 		         	}
 		         	else{
 		         		if(Math.abs(moveDistanceY) > 30){
-		         			var s_new = squareArr[currIndexX][currIndexY + (moveDistanceY > 0 ? 1 : -1)];
+		         			s_new = squareArr[currIndexX][currIndexY + (moveDistanceY > 0 ? 1 : -1)];
 		         			switchBitMapImage(s_new,squareArr[currIndexX][currIndexY]);
 		         		}
 		         	}
 		         	var currSquare = squareArr[currIndexX][currIndexY];
 		         	currSquare.x = currIndexX * 55;
 		         	currSquare.y = currIndexY * 55;
+		         	if(screenSquareCrash().length == 0){
+		         		switchBitMapImage(s_new,squareArr[currIndexX][currIndexY]);
+		         	}
 		        	currIndexX = -1;
-		            intervalID = window.setInterval(doscreenSquareCrash, 1000); 
+		            intervalID = window.setInterval(doscreenSquareCrash, 500); 
 		        	// indicate that the stage should be updated on the next tick:
 		        	update = true;
 		        });
@@ -194,6 +210,10 @@
 				crashedIndexsArr.push(c);
 			}
 		}
+		return crashedIndexsArr;
+	}
+
+	function ClearCraz3(crashedIndexsArr){
 		for(var i = 0; i < crashedIndexsArr.length ; i ++){
 			var c = crashedIndexsArr[i];
 			for(var j = 0;j < c.index_Y ; j++){
@@ -205,9 +225,7 @@
 		    squareArr[c.index_X][0].image = image;
 		    squareArr[c.index_X][0].squaretype = squaretype;
 		}
-		console.log(crashedIndexsArr);
-		stage.update();
-		return crashedIndexsArr.length;
+	    stage.update();
 	}
 
 	function returnCrashedIndexArr (squareTypeArr) {
