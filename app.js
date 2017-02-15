@@ -7,17 +7,27 @@
 	var squareArr = [[],[],[],[],[],[],[],[],[]];
 	var currIndexX,currIndexY;
 	init();
-	console.log(screenSquareCrash());
-
+	var score = 0;
+	var intervalID;
+    intervalID = window.setInterval(doscreenSquareCrash, 1000); 
+	
+	function doscreenSquareCrash(){
+		var this_score = screenSquareCrash();
+		score += this_score;
+		if(this_score == 0){
+			window.clearInterval(intervalID);
+		}
+		else{
+			console.log("score:" + score);
+		}
+	}
 
 	function init() {
 		// create stage and point it to the canvas:
 		canvas = document.getElementById("testCanvas");
 
-		//check to see if we are running in a browser with touch support 
+		//check to see if we are running in a browser with touch support
 		stage = new createjs.Stage(canvas);
-		stage.x = 50;
-		stage.y = 50;
 
 		// enable touch interactions if supported on the current device:
 		createjs.Touch.enable(stage);
@@ -123,17 +133,14 @@
 		         	else{
 		         		if(Math.abs(moveDistanceY) > 30){
 		         			var s_new = squareArr[currIndexX][currIndexY + (moveDistanceY > 0 ? 1 : -1)];
-							switchBitMapImage(s_new,squareArr[currIndexX][currIndexY]);
+		         			switchBitMapImage(s_new,squareArr[currIndexX][currIndexY]);
 		         		}
 		         	}
 		         	var currSquare = squareArr[currIndexX][currIndexY];
 		         	currSquare.x = currIndexX * 55;
 		         	currSquare.y = currIndexY * 55;
 		        	currIndexX = -1;
-		            var scroe = screenSquareCrash();
-		            if(scroe == 0){
-
-		            }
+		            intervalID = window.setInterval(doscreenSquareCrash, 1000); 
 		        	// indicate that the stage should be updated on the next tick:
 		        	update = true;
 		        });
@@ -158,7 +165,7 @@
 	}
 
 	function screenSquareCrash(){
-		var crashedIndexsArr = [];
+		var crashedIndexsArr = [];	
 		for(var indexX = 0 ; indexX < 9 ; indexX ++){
 			var squareTypeArr = [];
 			for(var indexY = 0 ; indexY < 9 ;indexY ++){
@@ -178,9 +185,7 @@
 			for(var indexX = 0 ; indexX < 9 ;indexX ++){
 				squareTypeArr.push(squareArr[indexX][indexY].squaretype);
 			}
-			console.log(squareTypeArr);
 			var crashedIndexArr = returnCrashedIndexArr(squareTypeArr);
-			console.log(crashedIndexArr);
 			var crashNums = crashedIndexArr.length;
 			for(var i = 0 ; i < crashNums ; i ++ ){
 				var c = new crashlocation();
@@ -189,22 +194,19 @@
 				crashedIndexsArr.push(c);
 			}
 		}
-		for(var i = 0; i < crashedIndexsArr.length ; i ++ ){
+		for(var i = 0; i < crashedIndexsArr.length ; i ++){
 			var c = crashedIndexsArr[i];
-			console.log(c);
 			for(var j = 0;j < c.index_Y ; j++){
 				switchBitMapImage(squareArr[c.index_X][c.index_Y - j],squareArr[c.index_X][c.index_Y - j - 1]);
-				stage.update();
-				//	sleep(1); 
 			}
 			var image = new Image();
 	        var squaretype = Math.floor(Math.random() * 7) + 1;
 		    image.src = "bitmaps/skill_0" + squaretype + ".png";
 		    squareArr[c.index_X][0].image = image;
 		    squareArr[c.index_X][0].squaretype = squaretype;
-			stage.update();
 		}
 		console.log(crashedIndexsArr);
+		stage.update();
 		return crashedIndexsArr.length;
 	}
 
@@ -245,10 +247,6 @@
 			update = false; // only update once
 			stage.update(event);
 		}
-	}
-
-	function pause(){
-		console.log(1);
 	}
 
 	function bitmapSquare(){
