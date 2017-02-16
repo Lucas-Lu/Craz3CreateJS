@@ -85,7 +85,7 @@
 		        container.addChild(bitmap);
 		        bitmap.x = indexX * 55;
 		        bitmap.y = indexY * 55;
-		        bitmap.scaleX = bitmap.scaleY = 1;
+		        bitmap.scaleX = bitmap.scaleY = bitmap.scale =1;
 		        bitmap.name = "bmp_" + indexX + "_" + indexY;
 		        bitmap.squaretype = squaretype;
 		        bitmap.cursor = "pointer";
@@ -160,6 +160,18 @@
 		        	// indicate that the stage should be updated on the next tick:
 		        	update = true;
 		        });
+
+	            bitmap.addEventListener("rollover", function (evt) {
+				    var o = evt.target;
+				    o.scaleX = o.scaleY = o.scale * 1.1;
+				    update = true;
+			    });
+
+			    bitmap.addEventListener("rollout", function (evt) {
+				    var o = evt.target;
+				    o.scaleX = o.scaleY = o.scale;
+				    update = true;
+			    });
 
 	        }
 
